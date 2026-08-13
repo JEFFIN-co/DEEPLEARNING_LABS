@@ -1,0 +1,84 @@
+import tensorflow as tf
+from tensorflow.keras.datasets import cifar10
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Flatten, Dense
+import matplotlib.pyplot as plt
+
+# Load CIFAR-10 dataset
+(x_train, y_train), (x_test, y_test) = cifar10.load_data()
+
+# Normalize pixel values
+x_train = x_train / 255.0
+x_test = x_test / 255.0
+
+# Convert labels to one-hot encoding
+y_train = to_categorical(y_train, 10)
+y_test = to_categorical(y_test, 10)
+
+# Create Feed Forward Neural Network
+model = Sequential()
+
+model.add(Flatten(input_shape=(32, 32, 3)))
+model.add(Dense(512, activation='relu'))
+model.add(Dense(256, activation='relu'))
+model.add(Dense(128, activation='relu'))
+model.add(Dense(10, activation='softmax'))
+
+# Compile the model
+model.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+# Create empty lists
+train_accuracy = []
+train_loss = []
+test_accuracy = []
+test_loss = []
+
+# Train for 10 epochs
+for i in range(10):
+    history = model.fit(
+        x_train,
+        y_train,
+        epochs=1,
+        verbose=1
+    )
+
+    train_accuracy.append(history.history['accuracy'][0])
+    train_loss.append(history.history['loss'][0])
+
+    loss, accuracy = model.evaluate(
+        x_test,
+        y_test,
+        verbose=0
+    )
+
+    test_loss.append(loss)
+    test_accuracy.append(accuracy)
+
+# Plot Training and Testing Accuracy
+plt.figure(figsize=(8,5))
+plt.plot(range(1, 11), train_accuracy, marker='o', linewidth=2, label='Training Accuracy')
+plt.plot(range(1, 11), test_accuracy, marker='s', linewidth=2, label='Testing Accuracy')
+plt.title('Training vs Testing Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.xticks(range(1, 11))
+plt.grid(True)
+plt.legend()
+plt.show()
+
+# Plot Training and Testing Loss
+plt.figure(figsize=(8,5))
+plt.plot(range(1, 11), train_loss, marker='o', linewidth=2, label='Training Loss')
+plt.plot(range(1, 11), test_loss, marker='s', linewidth=2, label='Testing Loss')
+plt.title('Training vs Testing Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.xticks(range(1, 11))
+plt.grid(True)
+plt.legend()
+plt.show()
